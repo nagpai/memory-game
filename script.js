@@ -1,10 +1,10 @@
 let player1 = {
-      name: 'player1',
+      name: 'Player 1',
       score: 0,
     },
 
     player2 = {
-      name: 'player2',
+      name: 'Player 2',
       score: 0,
     },
 
@@ -12,15 +12,17 @@ let player1 = {
       turn: 'player1',
       count: 0,
       winnerDeclared: false,
-    };
-  
-  
-let board = document.querySelectorAll('.block');
+      selections: [],
+      toggleTurn: function() {
+        (this.turn === 'player1') ? this.turn = 'player2' : this.turn = 'player1';
+      },
+    }
+    
+let blocks = document.querySelectorAll('.block');
 let commentary = document.querySelector('#commentary h3');
-let gameGrid = document.getElementById('game-grid');
-gameGrid.addEventListener('click', handleClick
-);
-
+let overlay = document.querySelectorAll('.overlay');
+blocks.forEach((x) => x.addEventListener('click', handleClick));
+//let blockState ={};
 function updateScore() {
   let scores = document.querySelectorAll('.score');
   scores[0].innerText = `Score: ${player1.score}`;
@@ -29,36 +31,53 @@ function updateScore() {
 
   // start game
 function startGame(){
+    //Reset scores
     player1.score = 0;
-    player2.score = 0; // reset score
+    player2.score = 0; 
 
-    updateScore(); //update the display
+    //Initiate game state
+    gameState.turn = 'player1';
+    gameState.count = 0;
+    gameState.winnerDeclared = false;
+
+    updateScore(); //update the score display
     shuffleBoard(); //shuffle the board 
     commentary.innerText = "Let the games begin! \n Player 1 start!";
 
+    //Set all block state to hidden
+
+   //for(i = 0; i < blocks.length; i++){
+     // blockState[i] = 'hidden';
+    //}
+
     //hide all cards with overlay
     let overlay = document.querySelectorAll('.overlay');
-    overlay.forEach((x) => {
-      x.style.opacity = 1;
-    });
+    blocks.forEach((x) => resetBlock(x));
   }
 
+function resetBlock(block) {
+    const overlay = block.lastChild;
+    overlay.style.visibility = 'visible';
+    overlay.style.backgroundColor = 'blue';
+    overlay.style.opacity = 1;
+}
 
 function shuffleBoard() {
 
-   //create a grid of  18 items repeated twice and shuffle it. Total array of 36 items. 
+   // Create a grid of  18 items repeated twice and shuffle it. Total array of 36 items. 
   let grid = Array.from(Array(18).keys());
   grid = grid.concat(grid);
   shuffleArray(grid);
-  shuffleArray(grid);
+  shuffleArray(grid); // Shuffle twice just like we do with cards. Once is not enough ;)
   
-  for (let i = 0; i < board.length; i++){
-    let card = board[i].firstChild;
-    card.src=`./img/sprites/${grid[i]}.png`;
+  // Assign images to each block in the game grid
+  for (let i = 0; i < blocks.length; i++){
+    let block = blocks[i].firstChild;
+    block.src=`./img/sprites/${grid[i]}.png`;
   }
 }
 
-// Shuffle array function
+// Shuffle array function - Fisher Yates algorithm
 function shuffleArray(array) {
 let currentIndex = array.length;
 let randomIndex, tempValue;
@@ -72,19 +91,92 @@ while (currentIndex !== 0) {
     array[randomIndex] = tempValue;
   }
 }
-// allow first player to make two matches .. announce success or failure and count score.. toggle turns.. continue until sum of scores = 18
-
-// set turn to player
 
 function handleClick(event){
-  let clickedCard = event.target;
-  console.log(clickedCard);
-  toggleOpacity(clickedCard);
-}
+  let selectedBlock = event.currentTarget;
+  let overlay = selectedBlock.lastChild;
+  let setOverlay = function(overlay,color){
+    overlay.style.backgroundColor = color;
+    overlay.style.opacity = 0.6;
+    gameState.selections.push({
+      img: selectedBlock.firstChild.src,
+      blockId: selectedBlock.id,
+    });
+  }
 
-function toggleOpacity(card){
-  console.log(card.style.opacity === '0');
-  card.hidden = true;
+  switch (gameState.turn) {
+
+    case 'player1' : {
+      switch (gameState.count) {
+        case 0 : {
+          setOverlay(overlay,'magenta');
+          commentary.innerText = `Hiya, ${gameState.turn}, nice choice! Select another card.`;
+          gameState.count++;
+          break;
+        }
+
+        case 1 : {
+          setOverlay(overlay,'magenta');
+          checkAnswer(player1);
+          break;
+        }
+      }
+      break;
+    }
+
+    case 'player2': {
+      switch (gameState.count) {
+        case 0 : {
+          setOverlay(overlay,'green');
+          commentary.innerText = `Hiya, ${gameState.turn}, nice choice! Select another card.`;
+          gameState.count++;
+          break;
+        }
+
+        case 1 : {
+          setOverlay(overlay,'green');
+          checkAnswer(player2);
+          break;
+        }
+      }
+      break;
+    }
+
+  }
+
+}
+// set turn to player
+function checkAnswer(player) {
+  if(gameState.selections[0].img === gameState.selections[1].img){
+    // Matching blocks found!
+    commentary.innerText = `Excellent, ${player.name}!, You score a point!`
+    //increase score by 1
+    player.score++;
+    updateScore();
+    gameState.toggleTurn();
+    gameState.selections = [];
+    gameState.count = 0;
+    // Check if winner
+    if ((player1.score + player2.score) === 18){
+      // If yes - announce and conclude game
+      commentary.innerText = `Congratulations, ${player.name}, you win!`;
+      blocks.forEach((x) => x.removeEventListener('click', handleClick));
+    }
+    // If no, change turn to other player
+  } else {
+    //sorry not matching
+    commentary.innerText = `Sorry, ${player.name}, \nyour cards do not match! Next Player!`
+    // hide the tiles again
+    setTimeout(function () {gameState.selections.forEach((x) => {
+      let id = x.blockId;
+      let unBlock = document.getElementById(id);
+      resetBlock(unBlock);
+      gameState.selections = [];
+      gameState.count = 0;
+    })}, 2000);
+    // change the turn to other player
+    gameState.toggleTurn();
+  }
 }
 
 window.onload = startGame;
