@@ -1,3 +1,5 @@
+// Objects to track player and Game states
+
 let player1 = {
       name: 'Player 1',
       score: 0,
@@ -22,14 +24,15 @@ let blocks = document.querySelectorAll('.block');
 let commentary = document.querySelector('#commentary h3');
 let overlay = document.querySelectorAll('.overlay');
 blocks.forEach((x) => x.addEventListener('click', handleClick));
-//let blockState ={};
+
+// Update score display
 function updateScore() {
   let scores = document.querySelectorAll('.score');
   scores[0].innerText = `Score: ${player1.score}`;
   scores[1].innerText = `Score: ${player2.score}`;
   }
 
-  // start game
+// Start game
 function startGame(){
     //Reset scores
     player1.score = 0;
@@ -44,17 +47,12 @@ function startGame(){
     shuffleBoard(); //shuffle the board 
     commentary.innerText = "Let the games begin! \n Player 1 start!";
 
-    //Set all block state to hidden
-
-   //for(i = 0; i < blocks.length; i++){
-     // blockState[i] = 'hidden';
-    //}
-
     //hide all cards with overlay
     let overlay = document.querySelectorAll('.overlay');
     blocks.forEach((x) => resetBlock(x));
   }
 
+// Hide a specified block  
 function resetBlock(block) {
     const overlay = block.lastChild;
     overlay.style.visibility = 'visible';
@@ -62,8 +60,8 @@ function resetBlock(block) {
     overlay.style.opacity = 1;
 }
 
+//Create a new shuffled board
 function shuffleBoard() {
-
    // Create a grid of  18 items repeated twice and shuffle it. Total array of 36 items. 
   let grid = Array.from(Array(18).keys());
   grid = grid.concat(grid);
@@ -92,9 +90,12 @@ while (currentIndex !== 0) {
   }
 }
 
+// Click event handler
 function handleClick(event){
   let selectedBlock = event.currentTarget;
   let overlay = selectedBlock.lastChild;
+
+  // Function to set block color depending on the player clicking it
   let setOverlay = function(overlay,color){
     overlay.style.backgroundColor = color;
     overlay.style.opacity = 0.6;
@@ -105,7 +106,7 @@ function handleClick(event){
   }
 
   switch (gameState.turn) {
-
+    // If it is player 1
     case 'player1' : {
       switch (gameState.count) {
         case 0 : {
@@ -124,6 +125,7 @@ function handleClick(event){
       break;
     }
 
+    // If it is player 2
     case 'player2': {
       switch (gameState.count) {
         case 0 : {
@@ -145,7 +147,8 @@ function handleClick(event){
   }
 
 }
-// set turn to player
+
+// Check if selections match
 function checkAnswer(player) {
   if(gameState.selections[0].img === gameState.selections[1].img){
     // Matching blocks found!
@@ -164,16 +167,15 @@ function checkAnswer(player) {
     }
     // If no, change turn to other player
   } else {
-    //sorry not matching
     commentary.innerText = `Sorry, ${player.name}, \nyour cards do not match! Next Player!`
-    // hide the tiles again
+    // hide the selected blocks again after 1 second
     setTimeout(function () {gameState.selections.forEach((x) => {
       let id = x.blockId;
       let unBlock = document.getElementById(id);
       resetBlock(unBlock);
       gameState.selections = [];
       gameState.count = 0;
-    })}, 2000);
+    })}, 1000);
     // change the turn to other player
     gameState.toggleTurn();
   }
