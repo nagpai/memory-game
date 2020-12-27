@@ -1,4 +1,4 @@
-// Objects to track player and Game states
+// Objects to track player and Game state
 
 let player1 = {
       name: 'Player 1',
@@ -58,6 +58,7 @@ function resetBlock(block) {
     overlay.style.visibility = 'visible';
     overlay.style.backgroundColor = 'blue';
     overlay.style.opacity = 1;
+    block.addEventListener('click', handleClick);
 }
 
 //Create a new shuffled board
@@ -103,6 +104,7 @@ function handleClick(event){
       img: selectedBlock.firstChild.src,
       blockId: selectedBlock.id,
     });
+    selectedBlock.removeEventListener('click', handleClick);
   }
 
   switch (gameState.turn) {
@@ -150,9 +152,14 @@ function handleClick(event){
 
 // Check if selections match
 function checkAnswer(player) {
+
+  let correctSound = new Audio ('./sound/correct.mp3');
+  let incorrectSound = new Audio( './sound/incorrect.mp3');
+
   if(gameState.selections[0].img === gameState.selections[1].img){
     // Matching blocks found!
     commentary.innerText = `Excellent, ${player.name}!, You score a point!`
+    correctSound.play();
     //increase score by 1
     player.score++;
     updateScore();
@@ -174,6 +181,8 @@ function checkAnswer(player) {
     // If no, change turn to other player
   } else {
     commentary.innerText = `Sorry, ${player.name}, \nyour cards do not match! Next Player!`
+
+    incorrectSound.play();
     // hide the selected blocks again after 1 second
     setTimeout(function () {gameState.selections.forEach((x) => {
       let id = x.blockId;
