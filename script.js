@@ -45,7 +45,7 @@ function startGame(){
 
     updateScore(); //update the score display
     shuffleBoard(); //shuffle the board 
-    commentary.innerText = "Let the games begin! \n Player 1 start!";
+    commentary.innerText = 'Let the games begin! \n Player 1 start!';
 
     //hide all cards with overlay
     let overlay = document.querySelectorAll('.overlay');
@@ -162,7 +162,13 @@ function checkAnswer(player) {
     // Check if winner
     if ((player1.score + player2.score) === 18){
       // If yes - announce and conclude game
-      commentary.innerText = `Congratulations, ${player.name}, you win!`;
+      if( player1.score === player2.score ) {
+        commentary.innerText = `Congratulations ${player1.name} and ${player2.name}. You both win!`
+      } else if ( player1.score > player2.score ) {
+        commentary.innerText = `Congratulations, ${player1.name}, you win!`
+      } else {
+        commentary.innerText = `Congratulations, ${player2.name}, you win!`
+      }
       blocks.forEach((x) => x.removeEventListener('click', handleClick));
     }
     // If no, change turn to other player
