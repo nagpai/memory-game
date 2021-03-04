@@ -17,8 +17,9 @@ let player1 = {
       selections: [],
       toggleTurn: function() {
         (this.turn === 'player1') ? this.turn = 'player2' : this.turn = 'player1';
-      },
-    }
+      }, 
+    }, 
+    grid;
     
 let blocks = document.querySelectorAll('.block');
 let commentary = document.querySelector('#commentary h3');
@@ -64,16 +65,16 @@ function resetBlock(block) {
 //Create a new shuffled board
 function shuffleBoard() {
    // Create a grid of  18 items repeated twice and shuffle it. Total array of 36 items. 
-  let grid = Array.from(Array(18).keys());
+  grid = Array.from(Array(18).keys());
   grid = grid.concat(grid);
   shuffleArray(grid);
   shuffleArray(grid); // Shuffle twice just like we do with cards. Once is not enough ;)
-  
   // Assign images to each block in the game grid
-  for (let i = 0; i < blocks.length; i++){
+  
+  /*for (let i = 0; i < blocks.length; i++){
     let block = blocks[i].firstChild;
     block.src=`./img/sprites/${grid[i]}.png`;
-  }
+  }*/
 }
 
 // Shuffle array function - Fisher Yates algorithm
@@ -95,14 +96,14 @@ while (currentIndex !== 0) {
 function handleClick(event){
   let selectedBlock = event.currentTarget;
   let overlay = selectedBlock.lastChild;
-
+  selectedBlock.firstChild.src = `./img/sprites/${grid[selectedBlock.id]}.png`;
   // Function to set block color depending on the player clicking it
   let setOverlay = function(overlay,color){
     overlay.style.backgroundColor = color;
     overlay.style.opacity = 0.6;
     gameState.selections.push({
-      img: selectedBlock.firstChild.src,
       blockId: selectedBlock.id,
+      img: selectedBlock.firstChild.src,  
     });
     selectedBlock.removeEventListener('click', handleClick);
   }
